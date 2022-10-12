@@ -1,51 +1,75 @@
-import React,{useState,useEffect} from 'react'
-import Pusher from 'pusher-js';
-import axios from "axios"
-import './App.css';
+import React, { useState, useEffect } from "react";
+import Pusher from "pusher-js";
+import axios from "axios";
+import "./App.css";
 
 function App() {
-  const [background,setBackground]= useState("#CDF6E5");
-  const [input,setInput]= useState("#CDF6E5");
-  useEffect(() => {
-    const pusher = new Pusher(process.env.REACT_APP_KEY
-      ,{
-      cluster: process.env.REACT_APP_CLUSTER
-     });
+  const [background, setBackground] = useState("#CDF6E5");
+
+  const [input, setInput] = useState("#CDF6E5");
+
+  const [userCount, setUserCount] = useState();
+
+  const url = `http://localhost:5000/users/${background.replace("#", "")}`;
+  console.log("uuu-", url);
+
+  const initial = async()=>{
+    const pusher = new Pusher(process.env.REACT_APP_KEY, {
+      cluster: process.env.REACT_APP_CLUSTER,
+    });
     const channel = pusher.subscribe("client");
-    channel.bind("suno-client", function(data) {
-      setBackground(data.color)
-      console.log("data==>",data);
-     });
-      }, [])
-  
-  const handleClick=async(e)=>{  
-      // requesting server to do realtime trigger
-      setBackground(input);
-      await axios.post('http://localhost:5000/update',{color:input});
-     
-  }
+    await channel.bind("suno-client", (data) => {
+      setBackground(data.color);
+      console.log("data==>", data);
+    });
+    await channel.bind("setUserCount", (data) => {
+      setUserCount(data.userCount);
+      console.log("data in setUserCount ==>", data);
+    });
+    setTimeout(async()=>{
+      await  axios.get(url);
+    },100);
+   
+    //  now to have the count of users
+    await window.addEventListener("unload", async () => {
+      await axios.get(url);
+    });
+  };
+  useEffect(() => {
+    initial();
     
-    return (
-      <div style={ {backgroundColor:background} } className="App">
+  }, []);
+
+  const handleClick = async (e) => {
+    // requesting server to do realtime trigger
+    setBackground(input);
+    await axios.post("http://localhost:5000/update", { color: input });
+  };
+
+  return (
+    <div style={{ backgroundColor: background }} className="App">
+      <h2 id="title">
+        {[0, 1].includes(userCount) ? `Active User` : `Active Users`}:{" "}
+        {userCount}
+      </h2>
       <div className="midContainer">
-      <h2 id="inlabel">Choose Your Color</h2>
-      <div className="inputCon">
-     
-      <input type="color" 
-      onChange={(e)=>{
+        <h2 id="inlabel">Choose Your Color</h2>
+        <div className="inputCon">
+          <input
+            type="color"
+            onChange={(e) => {
               setInput(e.target.value);
             }}
-             value={input}/>
-      </div>
-      <button onClick={ handleClick} className="btn" type="button"> Change</button>
-     
+            value={input}
+          />
+        </div>
+        <button onClick={handleClick} className="btn" type="button">
+          {" "}
+          Change
+        </button>
       </div>
     </div>
-    )
-
+  );
 }
 
 export default App;
-
-
-

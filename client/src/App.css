@@ -10,6 +10,7 @@
     padding:0px;
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     background-color:"#CDF6E5"
 }
@@ -31,7 +32,16 @@ font-size:xx-large;
 color: #333;
 
 }
-
+#title{
+color: #333;
+position: absolute;
+top: 10px;
+right: 30px;
+background-color: white;
+padding: 10px 15px;
+border-radius: 5px;
+box-shadow: 2px 2px 3px 3px #999;
+}
 .btn{
     display: flex;
     background-color: #4CAF50; /* Green */
