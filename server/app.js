@@ -3,16 +3,32 @@ const app = express();
 const cors = require("cors");
 const port = 5000;
 const Pusher = require("pusher");
+const fileUpload = require('express-fileupload');
+const cloudinary = require('cloudinary').v2;
 
 require("dotenv").config();
 
-var userCount, currColor;
+var userCount, currImg;
+
 app.use(cors({
   origin: ["http://localhost:3000"],
   optionsSuccessStatus: 200,
   credentials: true
 }));
+
+
 app.use(express.json());
+
+app.use(fileUpload({
+  useTempFiles: true,
+  tempFileDir : '/tmp/'
+}));
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET
+});
 
 const pusher = new Pusher({
   appId: process.env.APPID,
@@ -41,27 +57,27 @@ app.get('/', (req, res) => {
 });
 app.post("/update", async (req, res) => {
   try {
-    currColor = req.body.color;
+
+    // Photo Upload Functionality
+    // const file = req.files.bgImg;
+    const file = req.files.selectedFile;
+
+    await cloudinary.uploader.upload(file.tempFilePath, (err, result) => {
+      currImg = result.url;
+    });
+
+    // console.log("URL ===>", currImg);
 
     const attributes = "subscription_count,user_count";
     const response = await pusher.trigger("client", "suno-client", {
-      color: req.body.color
+      imgURL: currImg
     }, {
       info: attributes,
     });
-    if (response.status === 200) {
-      const body = await response.json();
-      const channelsInfo = body.channels;
-      // userCount = channelsInfo.client.subscription_count;
-      // console.log("res===", channelsInfo.client.subscription_count);
-    }
-    // publishing userCount
-    // await pusher.trigger("client","setUserCount",{
-    //         userCount:userCount
-    //         })
+
     return res.status(200).json({
       success: true,
-      user_count: userCount
+      imgURL: currImg
     });
   } catch (e) {
     return res.status(404).json({
@@ -70,15 +86,18 @@ app.post("/update", async (req, res) => {
   }
 
 });
-app.get("/users/:value", async (req, res) => {
+
+app.post("/users", async (req, res) => {
   let {
-    value
-  } = req.params;
-  console.log("====", value);
+    imgURL
+  } = req.body;
+
+  // console.log("====", imgURL);
+
   try {
     const attributes = "subscription_count,user_count";
     const response = await pusher.trigger("client", "suno-client", {
-      color: `#${value}`
+      imgURL: imgURL
     }, {
       info: attributes,
     });
@@ -86,9 +105,10 @@ app.get("/users/:value", async (req, res) => {
     const body = await response.json();
     const channelsInfo = body.channels;
     console.log("res===", channelsInfo.client.subscription_count);
+
     await pusher.trigger("client", "setUserCount", {
       userCount: channelsInfo.client.subscription_count,
-      color: currColor ? currColor : null
+      imgURL: currImg ? currImg : null
     })
     // publishing userCount
 
