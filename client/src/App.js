@@ -18,18 +18,25 @@ function App() {
       cluster: process.env.REACT_APP_CLUSTER,
     });
     const channel = pusher.subscribe("client");
+
     await channel.bind("suno-client", (data) => {
       setBackground(data.color);
       console.log("data==>", data);
     });
+
     await channel.bind("setUserCount", (data) => {
       setUserCount(data.userCount);
-      console.log("data in setUserCount ==>", data);
+
+      if(data.color){
+        setBackground(data.color);
+        setInput(data.color)
+      }
     });
+
     setTimeout(async()=>{
-      await  axios.get(url);
+      await axios.get(url);
     },100);
-   
+
     //  now to have the count of users
     await window.addEventListener("unload", async () => {
       await axios.get(url);
@@ -37,7 +44,6 @@ function App() {
   };
   useEffect(() => {
     initial();
-    
   }, []);
 
   const handleClick = async (e) => {
@@ -60,7 +66,7 @@ function App() {
             onChange={(e) => {
               setInput(e.target.value);
             }}
-            value={input}
+            value={background}
           />
         </div>
         <button onClick={handleClick} className="btn" type="button">
