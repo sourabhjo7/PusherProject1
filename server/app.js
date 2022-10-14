@@ -11,7 +11,7 @@ require("dotenv").config();
 var userCount, currImg;
 
 app.use(cors({
-  origin: ["http://localhost:3000"],
+  origin: "*",
   optionsSuccessStatus: 200,
   credentials: true
 }));
