@@ -23,19 +23,19 @@ function App() {
       console.log("Suno Client data==>", data);
       setImgURL(data.imgURL);
     });
-
+    channel.bind('pusher:subscription_count', (data) => {
+      setUserCount(data.subscription_count);  
+      console.log(data.subscription_count);
+ });
     await channel.bind("setUserCount", (data) => {
       console.log("UserCount Data ===>", data);
-      setUserCount(data.userCount);
-
       if(data.imgURL){
         setImgURL(data.imgURL);
         // setInput(data.color)
       }
     });
 
-    const url = `${process.env.REACT_APP_SERVER_URL}/users`;
-    console.log(url);
+    const url = `http://localhost:5000/users`;
     setTimeout( async () => {
       console.log(imgURL);
       await axios.post(url, {imgURL: `${imgURL}`}).then(res => { // then print response status
@@ -43,10 +43,6 @@ function App() {
       })
     }, 100);
 
-    //  now to have the count of users
-    await window.addEventListener("unload", async () => {
-      await axios.get(url);
-    });
   };
   useEffect(() => {
     initial();
@@ -58,7 +54,7 @@ function App() {
 
     const formData = new FormData();
     formData.append("selectedFile", selectedFile);
-    const newURL = `${process.env.REACT_APP_SERVER_URL}/update`
+    const newURL = 'http://localhost:5000/update'
 
     await axios.post(newURL, formData).then(res => { // then print response status
       console.log(res.data.imgURL);

@@ -96,19 +96,8 @@ app.post("/users", async (req, res) => {
   // console.log("====", imgURL);
 
   try {
-    const attributes = "subscription_count,user_count";
-    const response = await pusher.trigger("client", "suno-client", {
-      imgURL: imgURL
-    }, {
-      info: attributes,
-    });
-
-    const body = await response.json();
-    const channelsInfo = body.channels;
-    console.log("res===", channelsInfo.client.subscription_count);
-
+    
     await pusher.trigger("client", "setUserCount", {
-      userCount: channelsInfo.client.subscription_count,
       imgURL: currImg ? currImg : null
     })
     // publishing userCount
@@ -121,7 +110,7 @@ app.post("/users", async (req, res) => {
     return res.status(401).json({
       success: false
     });
-  }
+  } 
 });
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
