@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express();
 const cors = require("cors");
-const port = 5000;
+const PORT = process.env.PORT || 5000;
 const Pusher = require("pusher");
 const fileUpload = require('express-fileupload');
 const cloudinary = require('cloudinary').v2;
@@ -124,4 +124,4 @@ app.post("/users", async (req, res) => {
   }
 });
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))

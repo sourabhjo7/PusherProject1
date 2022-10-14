@@ -34,7 +34,8 @@ function App() {
       }
     });
 
-    const url = `http://localhost:5000/users`;
+    const url = `${process.env.REACT_APP_SERVER_URL}/users`;
+    console.log(url);
     setTimeout( async () => {
       console.log(imgURL);
       await axios.post(url, {imgURL: `${imgURL}`}).then(res => { // then print response status
@@ -57,7 +58,7 @@ function App() {
 
     const formData = new FormData();
     formData.append("selectedFile", selectedFile);
-    const newURL = 'http://localhost:5000/update'
+    const newURL = `${process.env.REACT_APP_SERVER_URL}/update`
 
     await axios.post(newURL, formData).then(res => { // then print response status
       console.log(res.data.imgURL);
